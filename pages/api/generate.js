@@ -50,12 +50,12 @@ export default async function (req, res) {
   }
 }
 
-function generatePrompt(animal) {
-  const capitalizedAnimal =
-    animal[0].toUpperCase() + animal.slice(1).toLowerCase();
+function generatePrompt(subject) {
+  const capitalizedSubject =
+    subject[0].toUpperCase() + subject.slice(1).toLowerCase();
   return `Write a haiku about this word consting of three lines with 17 syllables total. The first lines is 5 syllables, the second line is 7 syllables, and the third line is 5 syllables. Separate each line with a period.
 
 
-word: ${capitalizedAnimal}
+word: ${capitalizedSubject}
 haiku:`;
 }

@@ -3,33 +3,43 @@ import { useState } from "react";
 import styles from "./index.module.css";
 
 export default function Home() {
-  const [animalInput, setAnimalInput] = useState("");
+  const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState();
+  const [resultImage, setResultImage] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
-  async function onSubmit(event) {
-    event.preventDefault();
-    try {
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ animal: animalInput }),
-      });
 
-      const data = await response.json();
-      if (response.status !== 200) {
-        throw data.error || new Error(`Request failed with status ${response.status}`);
-      }
+  async function onSubmit(e) {
+    e.preventDefault()
+    setIsLoading(true)
+    setResult("")
 
-      setResult(data.result);
-      setAnimalInput("");
-    } catch(error) {
-      // Consider implementing your own error handling logic here
-      console.error(error);
-      alert(error.message);
-    }
+    const response = await fetch("/api/get-answer", {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ prompt: prompt })
+    })
+    const responseImage = await fetch("/api/get-painting", {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ prompt: prompt })
+    })
+    
+    const dataImage = await responseImage.json()
+    setResultImage(dataImage.text)
+    setIsLoading(false)
+    
+    const data = await response.json()
+    setResult(data.text.trim())
+    setIsLoading(false)
   }
+  
 
   return (
     <div>
@@ -42,14 +52,14 @@ export default function Home() {
         <form onSubmit={onSubmit}>
           <input
             type="text"
-            name="animal"
             placeholder="Enter a topic"
-            value={animalInput}
-            onChange={(e) => setAnimalInput(e.target.value)}
+            onChange={(e) => setPrompt(e.target.value)}
           />
           <input type="submit" value="Generate Haiku" />
         </form>
+        {isLoading && <div className={styles.loading_spinner}></div>}
         <div className={styles.result}>{result}</div>
+        {isLoading == false && <img className={styles.image} src={resultImage} />}
       </main>
     </div>
   );
